@@ -27,6 +27,7 @@ def make_stacked_graph(
     z_var: Optional[str] = None,
     multi_axis: bool = False,
     plot_lines: bool = True,
+    plot_title: str = None,
     customize_dict: Optional[CustomizationOptions] = None,
     unassigned_colors: Optional[list] = None,
     background_color: str = '#fcfcfc',
@@ -116,7 +117,7 @@ def make_stacked_graph(
 #         )
         #-------------------------------
         
-        #for each ofo the y variables, it starts adding a new column for that event
+        #for each of the y variables, it starts adding a new column for that event
         for y in y_vars:
             data, temp = datacacher.column_values_from_state(data, y, elapsed_seconds=True, time="scet")
         
@@ -137,7 +138,7 @@ def make_stacked_graph(
         x_domain_start = 0
 
         for subplot_num, y_dropdown in enumerate(y_vars, start=1):
-            print(y_dropdown)
+            #print(y_dropdown)
             if isinstance(y_dropdown, str):
                 y_dropdown = [y_dropdown]
 
@@ -249,7 +250,7 @@ def make_stacked_graph(
                         curr_x_val = data_slice._get_value(curr_index, x_var)
                         curr_y_val = data_slice._get_value(curr_index, y_val)
                         
-                        print(curr_x_val, curr_y_val)
+                        #print(curr_x_val, curr_y_val)
                         
 #                         graph.add_vline(
 #                             x= curr_x_val.timestamp()*1000, 
@@ -304,6 +305,12 @@ def make_stacked_graph(
             zerolinecolor=axis_line_color,
             linecolor=axis_line_color,
             linewidth=2,
+        )
+
+        graph.update_layout(
+            {
+                'title': {'text': plot_title}
+            }
         )
         
         return graph, unassigned_colors, marker_values, visible_traces
