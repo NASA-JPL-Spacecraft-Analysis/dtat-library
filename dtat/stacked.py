@@ -17,8 +17,6 @@ import dtat.mouseover_maker as mouseover_maker
 import dtat.commonchartfuncs as common
 import dtat.palette as palette
 from dtat.types import CustomizationOptions
-#from datetime import datetime
-
 
 def make_stacked_graph(
     data: "pd.DataFrame",
@@ -27,11 +25,14 @@ def make_stacked_graph(
     z_var: Optional[str] = None,
     multi_axis: bool = False,
     plot_lines: bool = True,
-    plot_title: str = None,
+    figure_title: str = None,
     customize_dict: Optional[CustomizationOptions] = None,
     unassigned_colors: Optional[list] = None,
     background_color: str = '#fcfcfc',
     axis_line_color: str = '#555555',
+    figure_margins: dict = None,
+    figure_height: int = None,
+    figure_width: int = None,
     events = {}
 ):
     """
@@ -75,6 +76,8 @@ def make_stacked_graph(
     if isinstance(y_vars, list):
         y_vars = [y for y in y_vars if y is not None and len(y) > 0]
 
+    figure_margins = dict(l=75, b=100, t=50, r=75) if figure_margins is None else figure_margins
+
     if y_vars is not None and len(y_vars) > 0:
         num_subplots = len(y_vars)
         graph = make_subplots(num_subplots, cols=1, shared_xaxes=True, vertical_spacing = 0.2).update_layout(
@@ -103,19 +106,6 @@ def make_stacked_graph(
 
         # determine if plot lines should be shown
         line_mode = "lines+markers" if plot_lines else "markers"
-
-        # use time as x variable
-        #if not datachecker.is_time_type(x_var):
-        #    x_var = "scet"
-        
-        #z_vals has the interpolated values and adds it as a column to data
-        #datacacher.sort_by(data, x_var)
-        #-------------------------
-        #OLD VERSION
-#         data, z_vals = datacacher.column_values_from_state(
-#             data, z_var, elapsed_seconds=True, time="scet"
-#         )
-        #-------------------------------
         
         #for each of the y variables, it starts adding a new column for that event
         for y in y_vars:
@@ -125,22 +115,14 @@ def make_stacked_graph(
         data, z_vals = datacacher.column_values_from_state(data, z_var, elapsed_seconds=True, time="scet") 
         
         vertical_spacing = 0.2 / num_subplots
-        #vertical_spacing = 0.5
         subplot_height = (1.0 - vertical_spacing * (num_subplots - 1)) / num_subplots
-        
-        
-        
-        #subplot_height = (1.0) / num_subplots
-
-        
         
         trace_num = 1
         x_domain_start = 0
 
-        for subplot_num, y_dropdown in enumerate(y_vars, start=1):
-            #print(y_dropdown)
-            if isinstance(y_dropdown, str):
-                y_dropdown = [y_dropdown]
+        for subplot_num, plot_y_vars in enumerate(y_vars, start=1):
+            if isinstance(plot_y_vars, str):
+                plot_y_vars = [plot_y_vars]
 
             # setting to -.06 so it will be incremented to zero
             y_axis_position = -0.06
@@ -151,14 +133,13 @@ def make_stacked_graph(
             y_axis_layout_name = "yaxis{}".format(subplot_num)
             title_color = "#000000"
 
-            for y_val in y_dropdown:
+            for y_val in plot_y_vars:
             
                 if y_val not in visible_traces:
                     visible_traces.append(y_val)
                 data_slice = datacacher.get_data_from_state(data, y_val)
-                #print(data_slice)
                 data_slice["value"] = pd.to_numeric(
-                    data_slice["value"], errors="ignore"
+                    data_slice["value"]
                 )
                 if y_val not in marker_values.keys():
                     if z_var is not None and z_var in data.columns:
@@ -204,7 +185,6 @@ def make_stacked_graph(
                         }
                     }
                 )
-                #print(data_slice[x_var])
                 graph.add_trace(
                     go.Scattergl(
                         x=data_slice[x_var],
@@ -222,22 +202,6 @@ def make_stacked_graph(
                     row=subplot_num,
                     col=1,
                 )
-                
-#                 graph.add_trace(
-#                     go.Scattergl(
-#                         x=[1000]*len(data_slice["value"]),
-#                         y=data_slice["value"],
-#                         name= "event1",
-#                         #meta=mouseover_maker.make_meta(z_var, data_slice),
-#                         hovertemplate="hello there",
-#                         mode=line_mode,
-#                         showlegend=False,
-#                         opacity=0.7,
-#                         marker=marker_values[y_val],
-#                     ),
-#                     row=subplot_num,
-#                     col=1,
-#                 )
                 trace_num += 1
                 
                 #EVENT PLOTTING (ARROW)
@@ -309,7 +273,11 @@ def make_stacked_graph(
 
         graph.update_layout(
             {
-                'title': {'text': plot_title}
+                'title': {'text': figure_title},
+                'font_family': 'Arial',
+                'hovermode': 'x unified',
+                'margin': figure_margins,
+                'width': figure_width,
             }
         )
         
