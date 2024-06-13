@@ -6,6 +6,7 @@ This version makes an arrow for each event
 
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Optional
+from datetime import datetime
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -33,7 +34,8 @@ def make_stacked_graph(
     figure_margins: dict = None,
     figure_height: int = None,
     figure_width: int = None,
-    events = {}
+    events: dict[tuple] = {},
+    event_line: bool = None
 ):
     """
     creates a stacked-plot graph
@@ -78,6 +80,9 @@ def make_stacked_graph(
 
     figure_margins = dict(l=75, b=100, t=50, r=75) if figure_margins is None else figure_margins
 
+    if figure_height is None:
+        figure_height = max(450, 200 * num_subplots + 2)
+
     if y_vars is not None and len(y_vars) > 0:
         num_subplots = len(y_vars)
         graph = make_subplots(num_subplots, cols=1, shared_xaxes=True, vertical_spacing = 0.2).update_layout(
@@ -101,15 +106,11 @@ def make_stacked_graph(
             legend=dict(
                 orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
             ),
-            height=max(450, 200 * num_subplots + 2),
+            height=figure_height
         )
 
         # determine if plot lines should be shown
         line_mode = "lines+markers" if plot_lines else "markers"
-        
-        #for each of the y variables, it starts adding a new column for that event
-        for y in y_vars:
-            data, temp = datacacher.column_values_from_state(data, y, elapsed_seconds=True, time="scet")
         
         data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
         data, z_vals = datacacher.column_values_from_state(data, z_var, elapsed_seconds=True, time="scet") 
@@ -121,8 +122,8 @@ def make_stacked_graph(
         x_domain_start = 0
 
         for subplot_num, plot_y_vars in enumerate(y_vars, start=1):
-            if isinstance(plot_y_vars, str):
-                plot_y_vars = [plot_y_vars]
+            #if isinstance(plot_y_vars, str):
+            #    plot_y_vars = [plot_y_vars]
 
             # setting to -.06 so it will be incremented to zero
             y_axis_position = -0.06
@@ -139,7 +140,7 @@ def make_stacked_graph(
                     visible_traces.append(y_val)
                 data_slice = datacacher.get_data_from_state(data, y_val)
                 data_slice["value"] = pd.to_numeric(
-                    data_slice["value"]
+                    data_slice["value"], errors='ignore'
                 )
                 if y_val not in marker_values.keys():
                     if z_var is not None and z_var in data.columns:
@@ -206,31 +207,43 @@ def make_stacked_graph(
                 
                 #EVENT PLOTTING (ARROW)
                 for e in events.get(y_val, []):
+
+                    #for each of the y variables, it starts adding a new column for that event
+                    if y_val not in data_slice.columns:
+                        data, temp = datacacher.column_values_from_state(data, y_val, elapsed_seconds=True, time="scet")
+                        
                     
                     #if the x variable is time
                     if datachecker.is_time_type(x_var):
+                        if len(e) == 2:
+                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1])
+                        else:
+                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1], e[2])
                         curr_index = abs(data_slice[x_var] - e[0]).idxmin()
+
+                        print (curr_index)
+
+                        curr_x_val = data_slice.get(curr_index, x_var)
+                        curr_y_val = data_slice.get(curr_index, y_val)
                         
-                        curr_x_val = data_slice._get_value(curr_index, x_var)
-                        curr_y_val = data_slice._get_value(curr_index, y_val)
+                        print(curr_x_val, curr_y_val)
                         
-                        #print(curr_x_val, curr_y_val)
-                        
-#                         graph.add_vline(
-#                             x= curr_x_val.timestamp()*1000, 
-#                             line_width=3, 
-#                             line_color="black", 
-#                             row = trace_num-1, 
-#                             col= 1)
+                        if event_line:
+                         graph.add_vline(
+                             x= curr_x_val.timestamp()*1000, 
+                             line_width=3, 
+                             line_color="black", 
+                             row = trace_num-1, 
+                             col= 1)
                         graph.add_annotation(
 #                             xref='x',
-                            yref = "y",
-                            ayref= "paper",
+                            ayref = "y",
+                            yref= "paper",
                             x= curr_x_val,
                             ay= 1,
                             y = curr_y_val,
                             text= e[1],
-                            hovertext=e[2],
+                            hovertext=e[2] if len(e) > 2 else e[1],
                             arrowhead = 1,
                             showarrow = True,
                             xanchor = "right"
@@ -239,9 +252,6 @@ def make_stacked_graph(
 
 
             x_domain_start = max(x_domain_start, y_axis_position)
-        
-        
-        
         
                       
         if multi_axis:
@@ -277,9 +287,11 @@ def make_stacked_graph(
                 'font_family': 'Arial',
                 'hovermode': 'x unified',
                 'margin': figure_margins,
-                'width': figure_width,
             }
         )
+
+        if figure_width is not None:
+            graph.update_layout({'width': figure_width})
         
         return graph, unassigned_colors, marker_values, visible_traces
 
