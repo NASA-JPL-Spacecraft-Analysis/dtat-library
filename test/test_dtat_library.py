@@ -66,6 +66,7 @@ class CSVConnector:
 predicted = CSVConnector("docs/sampledata.csv")
 fig,c,m,t = dtat.make_stacked_graph(predicted.get_data(), 
             y_vars = [["Sample1"], ["Sample2"]], 
+            y_axis_units = ["samples", "random samples"],
             x_var = "scet", 
             figure_title="new plot", 
             #figure_width=6000,

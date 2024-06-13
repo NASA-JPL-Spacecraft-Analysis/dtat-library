@@ -22,6 +22,7 @@ from dtat.types import CustomizationOptions
 def make_stacked_graph(
     data: "pd.DataFrame",
     y_vars: Sequence[Sequence[str]],
+    y_axis_units: Sequence[str] = [],
     x_var: str = "scet",
     z_var: Optional[str] = None,
     multi_axis: bool = False,
@@ -122,15 +123,13 @@ def make_stacked_graph(
         x_domain_start = 0
 
         for subplot_num, plot_y_vars in enumerate(y_vars, start=1):
-            #if isinstance(plot_y_vars, str):
-            #    plot_y_vars = [plot_y_vars]
 
             # setting to -.06 so it will be incremented to zero
             y_axis_position = -0.06
             y_domain_start = (num_subplots - subplot_num + 1) / num_subplots
             domain = [y_domain_start - subplot_height, y_domain_start]
 
-            y_axis_title = "Y axis ({})".format("Unit")
+            y_axis_title = f'Y axis ({y_axis_units[subplot_num-1]})' if len(y_axis_units) > 0 else 'Y axis'
             y_axis_layout_name = "yaxis{}".format(subplot_num)
             title_color = "#000000"
 
