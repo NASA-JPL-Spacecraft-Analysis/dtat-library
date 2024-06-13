@@ -70,6 +70,7 @@ fig,c,m,t = dtat.make_stacked_graph(predicted.get_data(),
             figure_title="new plot", 
             #figure_width=6000,
             figure_height = 1000,
-            events={"Sample1": [("2020-001T01:40:50.910", "event1"), ("2020-002T01:40:50.910", "event3")], "predicted": [("2020-001T11:40:50.910", "event2")]}
+            events={"Sample1": [("2020-001T01:40:50.910", "event1"), ("2020-002T01:40:50.910", "event3")], "Sample2": [("2020-001T11:40:50.910", "event2")]},
+            event_line=True,
             )
 fig.show()

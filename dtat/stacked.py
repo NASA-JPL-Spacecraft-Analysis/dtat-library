@@ -212,44 +212,33 @@ def make_stacked_graph(
                     if y_val not in data_slice.columns:
                         data, temp = datacacher.column_values_from_state(data, y_val, elapsed_seconds=True, time="scet")
                         
-                    
-                    #if the x variable is time
+                    #if the x variable is time (otherwise don't bother trying to plot non-time events)
                     if datachecker.is_time_type(x_var):
                         if len(e) == 2:
                             e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1])
                         else:
                             e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1], e[2])
-                        curr_index = abs(data_slice[x_var] - e[0]).idxmin()
-
-                        print (curr_index)
-
-                        curr_x_val = data_slice.get(curr_index, x_var)
-                        curr_y_val = data_slice.get(curr_index, y_val)
-                        
-                        print(curr_x_val, curr_y_val)
-                        
+                                                
                         if event_line:
-                         graph.add_vline(
-                             x= curr_x_val.timestamp()*1000, 
-                             line_width=3, 
-                             line_color="black", 
-                             row = trace_num-1, 
-                             col= 1)
+                            graph.add_vline(
+                                x=e[0],
+                                line_width=3, 
+                                line_color="black", 
+                                row = trace_num-1, 
+                                col= 1
+                            )
+                        
                         graph.add_annotation(
-#                             xref='x',
-                            ayref = "y",
-                            yref= "paper",
-                            x= curr_x_val,
-                            ay= 1,
-                            y = curr_y_val,
+                            x = e[0],
+                            yref = f'y{subplot_num} domain' if subplot_num > 1 else 'y domain',
+                            ayref=f'y{subplot_num} domain' if subplot_num > 1 else 'y domain',
+                            y=0,
+                            ay = -0.1,
                             text= e[1],
                             hovertext=e[2] if len(e) > 2 else e[1],
                             arrowhead = 1,
-                            showarrow = True,
-                            xanchor = "right"
+                            showarrow = True
                         )
-                
-
 
             x_domain_start = max(x_domain_start, y_axis_position)
         
