@@ -1,14 +1,18 @@
+import pandas as pd
+import dtat.datachecker
+
 class CSVConnector:
     """Connector object to read data from a file"""
 
     def __init__(self, file):
-        import pandas as pd
 
         self.__file = file
 
         self.__data = pd.DataFrame()
 
         self.refresh_data()
+
+        dtat.datachecker.verify_header(self.__data)
 
         self.__states = self.__scrape_states()
 
@@ -22,7 +26,6 @@ class CSVConnector:
 
     def refresh_data(self):
         """Refresh the data stored by the object with the latest from the original file"""
-        import pandas as pd
 
         def handle_mixed_time_formats(timestamp):
             """Tries to convert a string with subseconds first,
