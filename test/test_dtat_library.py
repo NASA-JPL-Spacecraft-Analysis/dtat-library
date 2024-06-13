@@ -1,4 +1,4 @@
-import dtat.stacked as dtat
+import dtat.plot as dtat
 
 class CSVConnector:
     """Connector object to read data from a file"""
