@@ -19,6 +19,9 @@ import dtat.commonchartfuncs as common
 import dtat.palette as palette
 from dtat.types import CustomizationOptions
 
+import warnings
+warnings.filterwarnings('ignore')
+
 def make_stacked_graph(
     data: "pd.DataFrame",
     y_vars: Sequence[Sequence[str]],
@@ -76,8 +79,7 @@ def make_stacked_graph(
     if unassigned_colors is None:
         unassigned_colors = palette.get_default_colors()
 
-    if isinstance(y_vars, list):
-        y_vars = [y for y in y_vars if y is not None and len(y) > 0]
+    num_subplots = len(y_vars)
 
     figure_margins = dict(l=75, b=100, t=50, r=75) if figure_margins is None else figure_margins
 
@@ -85,7 +87,6 @@ def make_stacked_graph(
         figure_height = max(450, 200 * num_subplots + 2)
 
     if y_vars is not None and len(y_vars) > 0:
-        num_subplots = len(y_vars)
         graph = make_subplots(num_subplots, cols=1, shared_xaxes=True, vertical_spacing = 0.2).update_layout(
             plot_bgcolor=background_color,
             xaxis=dict(
@@ -129,7 +130,10 @@ def make_stacked_graph(
             y_domain_start = (num_subplots - subplot_num + 1) / num_subplots
             domain = [y_domain_start - subplot_height, y_domain_start]
 
-            y_axis_title = f'Y axis ({y_axis_units[subplot_num-1]})' if len(y_axis_units) > 0 else 'Y axis'
+            if len(plot_y_vars) == 1:
+                y_axis_title = plot_y_vars[0]
+            else:
+                y_axis_title = f'Y axis ({y_axis_units[subplot_num-1]})' if len(y_axis_units) > 0 else 'Y axis'
             y_axis_layout_name = "yaxis{}".format(subplot_num)
             title_color = "#000000"
 
@@ -167,7 +171,7 @@ def make_stacked_graph(
                 if multi_axis:
                     y_axis_position += 0.06
                     title_color = marker_values[y_val]["line"]["color"]
-                    y_axis_title = "{} ({})".format(y_val, "Unit")
+                    y_axis_title = f"{y_val}"
                     y_axis_layout_name = "yaxis{}".format(trace_num)
 
                 graph.update_layout(
@@ -274,8 +278,12 @@ def make_stacked_graph(
                 'title': {'text': figure_title},
                 'font_family': 'Arial',
                 'hovermode': 'x unified',
-                'margin': figure_margins,
+                'margin': figure_margins
             }
+        )
+
+        graph.update_xaxes(
+            title_text=x_var
         )
 
         if figure_width is not None:
