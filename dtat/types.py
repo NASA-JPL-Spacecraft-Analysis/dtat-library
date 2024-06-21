@@ -17,7 +17,6 @@ class CustomizedTrace(TypedDict):
     colorscale: str
     showscale: bool
     line: Line
-    solid_color: str
     z_var: Optional[str]
     mode: str
 

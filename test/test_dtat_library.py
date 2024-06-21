@@ -1,10 +1,10 @@
-import dtat.plot as dtat
+import dtat.plot as plot
 from dtat.dataconnectors.csvconnector import CSVConnector
 
 
 #load the data
 predicted = CSVConnector("docs/sampledata.csv")
-fig,c,m,t = dtat.make_stacked_graph(predicted.get_data(), 
+fig,c,m,t = plot.make_stacked_graph(predicted.get_data(), 
             y_vars = [["Sample1"], ["Sample2"]], 
             y_axis_units = ["samples", "random samples"],
             x_var = "scet", 
