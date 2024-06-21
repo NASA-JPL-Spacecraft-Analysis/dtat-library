@@ -41,14 +41,13 @@ def make_stacked_graph(
     events: dict[tuple] = {},
     event_line: bool = None
 ):
-    """
-    creates a stacked-plot graph
-    event:
+    '''
+    events:
         A dictionary
             - key = y_var name
-            - value = lists of tuples 
-        example: {"actual": [(5, "event1"), (10, "event3")], "predicted": [(7, "event2")]}
-    """
+            - value = lists of tuples of (time, name, message)
+        example: {"actual": [(time1, "event1", "message1"), (time2, "event2", "message2")], "predicted": [(time3, "event3", "message3")]}
+    ''' 
     graph = go.Figure()
     graph.update_layout(
         plot_bgcolor=background_color,
