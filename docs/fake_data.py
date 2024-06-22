@@ -1,0 +1,52 @@
+import pdb
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+def make_time_col(length=1000):
+	start_time = pd.Timestamp.now().floor('min')
+	end_time = start_time + pd.Timedelta(minutes=(length-1))
+	return pd.date_range(start=start_time, end=end_time, freq='min').to_list()
+
+def instrument_turn_on():
+	#box turns on at x=-60
+	x = (np.arange(1000)-300)*2
+	y = 20*np.exp(0.025*x)/(20+np.exp(0.025*x))+10*np.random.rand(len(x))
+	std_deviations = np.array([1.0, 2.0])
+	random_array = np.random.randn(1000) * 10
+
+	return pd.DataFrame({
+		"scet": make_time_col(length=1000) + make_time_col(length=1000) + make_time_col(length=1000),
+		"name": ["Sample1"]*1000 + ["Sample2"]*1000 + ["Mode"]*1000,
+		"value": list(y) + list(x) + ["OFF"]*300 + ["ON"]*700
+		})
+
+def drifting_off_nominal():
+
+	alpha = (np.arange(1000))*2-1925
+	t = 10 + 2000*np.exp(0.005*alpha)/(2000+np.exp(0.005*alpha))+0*np.random.rand(len(alpha))
+
+	num_rows = 1000
+	num_cols = 2
+
+	# Specify different standard deviations for each column
+	std_deviations = np.array([1.0, 2.0])
+
+	# Generate random array with specified shape and standard deviations
+	random_array = np.random.randn(num_rows, num_cols) * std_deviations
+
+	x = t*5 + 3*random_array[:,0]
+	y = t*6 + random_array[:,1]
+	# plt.plot(x,y,'.')
+	# plt.show()
+	return pd.DataFrame({
+		"scet": make_time_col(length=1000) + make_time_col(length=1000) + make_time_col(length=1000),
+		"name": ["Sample1"]*1000 + ["Sample2"]*1000 + ["Mode"]*1000,
+		"value": list(x) + list(y) + ["OFF"]*300 + ["ON"]*700
+		})
+
+if __name__ == '__main__':
+	drifting_off_nominal()
+	# x, y = turn_on_data()
+
+	pdb.set_trace()
