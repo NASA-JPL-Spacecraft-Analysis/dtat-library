@@ -11,14 +11,15 @@ def make_time_col(length=1000):
 def instrument_turn_on():
 	#box turns on at x=-60
 	x = (np.arange(1000)-300)*2
-	y = 20*np.exp(0.025*x)/(20+np.exp(0.025*x))+10*np.random.rand(len(x))
+	voltage = 20*np.exp(0.025*x)/(20+np.exp(0.025*x))+10*np.random.rand(len(x))
+	current = 5*np.exp(0.025*x)/(5+np.exp(0.025*x))+1*np.random.rand(len(x))
 	std_deviations = np.array([1.0, 2.0])
 	random_array = np.random.randn(1000) * 10
 
 	return pd.DataFrame({
 		"scet": make_time_col(length=1000) + make_time_col(length=1000) + make_time_col(length=1000),
-		"name": ["Sample1"]*1000 + ["Sample2"]*1000 + ["Mode"]*1000,
-		"value": list(y) + list(x) + ["OFF"]*300 + ["ON"]*700
+		"name": ["Voltage"]*1000 + ["Current"]*1000 + ["Mode"]*1000,
+		"value": list(voltage) + list(current) + ['TEST']*300 + ['INIT']*150 + ['OPERATIONAL']*550
 		})
 
 def drifting_off_nominal():
@@ -41,7 +42,7 @@ def drifting_off_nominal():
 	# plt.show()
 	return pd.DataFrame({
 		"scet": make_time_col(length=1000) + make_time_col(length=1000) + make_time_col(length=1000),
-		"name": ["Sample1"]*1000 + ["Sample2"]*1000 + ["Mode"]*1000,
+		"name": ["Voltage"]*1000 + ["Current"]*1000 + ["Mode"]*1000,
 		"value": list(x) + list(y) + ["OFF"]*300 + ["ON"]*700
 		})
 
