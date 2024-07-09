@@ -197,7 +197,7 @@ def make_stacked_graph(
                         y=data_slice["value"],
                         name=y_val,
                         meta=mouseover_maker.make_meta(z_var, data_slice),
-                        hovertemplate=mouseover_maker.ht_X_Y_Z_names(
+                        hovertemplate=mouseover_maker.ht_X_Y_Z_time_names(
                             xaxis=x_var, yaxis=y_val, zaxis=z_var
                         ),
                         mode=line_mode,
@@ -279,7 +279,6 @@ def make_stacked_graph(
             {
                 'title': {'text': figure_title},
                 'font_family': 'Arial',
-                'hovermode': 'x unified',
                 'margin': figure_margins
             }
         )
