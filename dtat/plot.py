@@ -530,15 +530,16 @@ def make_bar_graph(
 
     data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
 
-    y1_data_slice = datacacher.get_data_from_state(data, y1)
-    y2_data_slice = datacacher.get_data_from_state(data, y2)
+    interpolated = datacacher.column_values_from_state(data, y2, x_var)[0]
+    
+    y1_data_slice = datacacher.get_data_from_state(interpolated, y1)
+    y2_data_slice = datacacher.get_data_from_state(interpolated, y2)
+
+    diff_slice = y1_data_slice['value'] - y1_data_slice[y2]
 
     average_time = y1_data_slice[x_var].max() - y1_data_slice[x_var].min()
     if datachecker.is_time_type(x_var):
         average_time = average_time.total_seconds()
-
-    interpolated = datacacher.column_values_from_state(data, y2, x_var)[0]
-    diff_slice = interpolated['value'] - interpolated[y2]
 
     graph.add_traces(go.Bar(x=y1_data_slice[x_var], y = diff_slice, 
                         width=average_time*bar_width,
