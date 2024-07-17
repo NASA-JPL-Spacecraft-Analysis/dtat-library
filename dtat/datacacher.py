@@ -96,3 +96,12 @@ def print_data(data):
     """Print the current data to console"""
     with pd.option_context("display.max_rows", None, "display.max_columns", None):
         print("\n %s", data)
+
+def get_units_from_state(data, state):
+    if datachecker.is_time_type(state):
+        return 'Time'
+    if 'unit' in data.columns and state in data.name.unique():
+        unit = data[data['name'] == state][0]['unit']
+        print (unit, "got here")
+        return unit
+    return 'Unknown'
