@@ -1,6 +1,7 @@
 """Datacache object functions for a cache for data from one or more sources"""
 
 import logging
+import datetime
 
 import pandas as pd
 
@@ -97,6 +98,7 @@ def print_data(data):
     with pd.option_context("display.max_rows", None, "display.max_columns", None):
         print("\n %s", data)
 
+
 def get_units_from_state(data, state):
     if datachecker.is_time_type(state):
         return 'Time'
@@ -108,3 +110,11 @@ def get_units_from_state(data, state):
                 return units[0]
             return units
     return 'Unknown'
+
+
+def make_doy_from_state(data, state):
+    if datachecker.is_time_type(state) and 'doy' not in data.columns:
+        data['doy'] = data.apply(
+            lambda row: datetime.datetime.strftime(row[state], '%Y/%jT%H:%M:%S.%f'), 
+            axis=1)
+    return data

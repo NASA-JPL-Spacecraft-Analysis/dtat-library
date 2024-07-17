@@ -12,7 +12,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-import dtat.datacacher as datacacher
+import dtat.dtatdata as dtatdata
 import dtat.datachecker as datachecker
 import dtat.mouseover_maker as mouseover_maker
 import dtat.commonchartfuncs as common
@@ -40,6 +40,7 @@ def make_stacked_graph(
     figure_width: int = None,
     events: dict[tuple] = {},
     event_line: bool = None,
+    doy: bool = False,
 ):
     '''
     events:
@@ -113,8 +114,8 @@ def make_stacked_graph(
         # determine if plot lines should be shown
         line_mode = "lines+markers" if plot_lines else "markers"
 
-        data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
-        data, z_vals = datacacher.column_values_from_state(data, z_var, elapsed_seconds=True, time="scet") 
+        data, temp = dtatdata.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
+        data, z_vals = dtatdata.column_values_from_state(data, z_var, elapsed_seconds=True, time="scet") 
         
         vertical_spacing = 0.2 / num_subplots
         subplot_height = (1.0 - vertical_spacing * (num_subplots - 1)) / num_subplots
@@ -128,7 +129,7 @@ def make_stacked_graph(
             y_axis_position = -0.1
             y_domain_start = (num_subplots - subplot_num + 1) / num_subplots
             domain = [y_domain_start - subplot_height, y_domain_start]
-            y_axis_units = datacacher.get_units_from_state(data, plot_y_vars[0])
+            y_axis_units = dtatdata.get_units_from_state(data, plot_y_vars[0])
 
             if len(plot_y_vars) == 1:
                 y_axis_title = f'{plot_y_vars[0]} ({y_axis_units})'
@@ -141,7 +142,7 @@ def make_stacked_graph(
             
                 if y_val not in visible_traces:
                     visible_traces.append(y_val)
-                data_slice = datacacher.get_data_from_state(data, y_val)
+                data_slice = dtatdata.get_data_from_state(data, y_val)
                 data_slice["value"] = pd.to_numeric(
                     data_slice["value"], errors='ignore'
                 )
@@ -192,6 +193,12 @@ def make_stacked_graph(
                         }
                     }
                 )
+
+                if doy:
+                    data_slice = dtatdata.make_doy_from_state(data_slice, x_var)
+                    print (data_slice)
+                    x_var = 'doy'
+
                 graph.add_trace(
                     go.Scattergl(
                         x=data_slice[x_var],
@@ -218,7 +225,7 @@ def make_stacked_graph(
 
                     #for each of the y variables, it starts adding a new column for that event
                     if y_val not in data_slice.columns:
-                        data, temp = datacacher.column_values_from_state(data, y_val, elapsed_seconds=True, time="scet")
+                        data, temp = dtatdata.column_values_from_state(data, y_val, elapsed_seconds=True, time="scet")
                         
                     #if the x variable is time (otherwise don't bother trying to plot non-time events)
                     if datachecker.is_time_type(x_var):
@@ -286,7 +293,7 @@ def make_stacked_graph(
             }
         )
 
-        x_unit = datacacher.get_units_from_state(data, x_var)
+        x_unit = dtatdata.get_units_from_state(data, x_var)
         graph.update_xaxes(
             title_text=f'{x_var} ({x_unit})'
         )
@@ -379,10 +386,10 @@ def make_diff_graph(
         height=figure_height
     )
 
-    data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
+    data, temp = dtatdata.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
 
-    y1_data_slice = datacacher.get_data_from_state(data, y1)
-    y2_data_slice = datacacher.get_data_from_state(data, y2)
+    y1_data_slice = dtatdata.get_data_from_state(data, y1)
+    y2_data_slice = dtatdata.get_data_from_state(data, y2)
 
     graph.add_trace(go.Scatter(
         x = y1_data_slice[x_var], 
@@ -528,12 +535,12 @@ def make_bar_graph(
         height=figure_height
     )
 
-    data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
+    data, temp = dtatdata.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
 
-    interpolated = datacacher.column_values_from_state(data, y2, x_var)[0]
+    interpolated = dtatdata.column_values_from_state(data, y2, x_var)[0]
     
-    y1_data_slice = datacacher.get_data_from_state(interpolated, y1)
-    y2_data_slice = datacacher.get_data_from_state(interpolated, y2)
+    y1_data_slice = dtatdata.get_data_from_state(interpolated, y1)
+    y2_data_slice = dtatdata.get_data_from_state(interpolated, y2)
 
     diff_slice = y1_data_slice['value'] - y1_data_slice[y2]
 
