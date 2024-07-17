@@ -100,8 +100,11 @@ def print_data(data):
 def get_units_from_state(data, state):
     if datachecker.is_time_type(state):
         return 'Time'
-    if 'unit' in data.columns and state in data.name.unique():
-        unit = data[data['name'] == state][0]['unit']
-        print (unit, "got here")
-        return unit
+    if 'unit' in data.columns:
+        state_data = get_data_from_state(data, state)
+        if len(state_data) > 0:
+            units = state_data.pop('unit').unique()
+            if len(units) == 1:
+                return units[0]
+            return units
     return 'Unknown'
