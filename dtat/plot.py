@@ -40,7 +40,7 @@ def make_stacked_graph(
     figure_width: int = None,
     events: dict[tuple] = {},
     event_line: bool = None,
-    doy: bool = False,
+    doy: bool = True,
 ):
     '''
     events:
@@ -194,11 +194,6 @@ def make_stacked_graph(
                     }
                 )
 
-                if doy:
-                    data_slice = dtatdata.make_doy_from_state(data_slice, x_var)
-                    print (data_slice)
-                    x_var = 'doy'
-
                 graph.add_trace(
                     go.Scattergl(
                         x=data_slice[x_var],
@@ -212,8 +207,6 @@ def make_stacked_graph(
                         showlegend=True,
                         opacity=0.7,
                         marker=marker_values[y_val],
-                        #"tickvals": [],
-                        #"ticktext": []
                     ),
                     row=subplot_num,
                     col=1,
@@ -274,8 +267,12 @@ def make_stacked_graph(
             gridcolor=axis_line_color,
             zerolinecolor=axis_line_color,
             linecolor=axis_line_color,
-            linewidth=2,
+            linewidth=2
         )
+        if doy:
+            graph.update_xaxes(
+                tickformat='%Y/%jT%H:%M:%S.%L'
+            )
         graph.update_yaxes(
             showline=True,
             showgrid=True,

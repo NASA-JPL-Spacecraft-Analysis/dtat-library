@@ -25,7 +25,7 @@ def valid_value_col_names():
 def valid_time_type_cols():
     """A list of all valid time type column names.
     This is the source of truth definition."""
-    return ["scet", "ert"]
+    return ["scet", "ert", "doy"]
 
 
 def verify_header(data):

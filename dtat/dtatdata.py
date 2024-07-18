@@ -113,8 +113,10 @@ def get_units_from_state(data, state):
 
 
 def make_doy_from_state(data, state):
+    print (data.columns)
     if datachecker.is_time_type(state) and 'doy' not in data.columns:
         data['doy'] = data.apply(
             lambda row: datetime.datetime.strftime(row[state], '%Y/%jT%H:%M:%S.%f'), 
             axis=1)
+        #print (data['doy'])
     return data
