@@ -132,9 +132,9 @@ def make_stacked_graph(
             y_axis_units = dtatdata.get_units_from_state(data, plot_y_vars[0])
 
             if len(plot_y_vars) == 1:
-                y_axis_title = f'{plot_y_vars[0]} ({y_axis_units})'
+                y_axis_title = f'{plot_y_vars[0]} ({y_axis_units})' if y_axis_units is not None else f'{plot_y_vars}'
             else:
-                y_axis_title = f'Y axis ({y_axis_units[subplot_num-1]})' if len(y_axis_units) > 0 else 'Y axis'
+                y_axis_title = f'Y axis ({y_axis_units})' if y_axis_units is not None else f'Y axis'
             y_axis_layout_name = "yaxis{}".format(subplot_num)
             title_color = "#000000"
 
@@ -292,7 +292,7 @@ def make_stacked_graph(
 
         x_unit = dtatdata.get_units_from_state(data, x_var)
         graph.update_xaxes(
-            title_text=f'{x_var} ({x_unit})'
+            title_text=f'{x_var} ({x_unit})' if x_unit is not None else f'{x_var}'
         )
 
         if figure_width is not None:

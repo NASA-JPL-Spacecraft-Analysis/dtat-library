@@ -42,7 +42,7 @@ class DefaultInterpolator:
         # and the column has no null values
         if state in self.data.columns:
             logging.debug("found z_var in %s", self.data.columns)
-            if not pd.isnull(self.data[state]).all():
+            if not pd.isnull(self.data[state]).all():# and not pd.isnull(self.data["z_numeric"]).all():
                 return self.data
 
         if state not in self.data.name.values:
@@ -60,11 +60,12 @@ class DefaultInterpolator:
         state_data = state_data.interpolate(method="pad")
         state_data = state_data.interpolate(method="backfill")
         try:
-            state_data = state_data.astype(float)
+            numeric_data = state_data.astype(float)
         except ValueError:
-            state_data = self.make_num_vals_from_strings(state_data)
+            numeric_data = self.make_num_vals_from_strings(state_data)
 
         self.data[state] = state_data
+        self.data["z_numeric"] = numeric_data #numeric_data
 
         return self.data
 
