@@ -101,21 +101,27 @@ def print_data(data):
         print("\n %s", data)
 
 
-def get_units_from_state(data, state):
+def get_units_from_states(data, states):
+    if isinstance(states, list):
+        units = []
+        for state in states:
+            r = get_unit_from_state(data, state)
+            units.append(r)
+        return units
+    else: 
+        return get_unit_from_state(data, states)
+
+def get_unit_from_state(data, state):
     if datachecker.is_time_type(state):
         return 'Time'
     if 'unit' in data.columns:
         state_data = get_data_from_state(data, state)
         if len(state_data) > 0:
-            units = state_data.pop('unit').unique()
-            if len(units) == 1:
-                if str.upper(units[0]) == "NONE":
-                    return None
-                return units[0]
-            caps_units = [str.upper(u) for u in units]
-            if len(caps_units) != len(units):
-                warnings.warn(f'DTAT has detected units that may have mismatched capitalization. {units}')
-            return units
+            unit = state_data['unit'].unique()
+            if len(unit) == 1:
+                return unit[0]
+            warnings.warn(f'DTAT has detected multiple units for a single state. {state} has units {unit}.')
+            return unit
     return 'Unknown'
 
 

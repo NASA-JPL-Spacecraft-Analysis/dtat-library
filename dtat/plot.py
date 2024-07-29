@@ -129,12 +129,12 @@ def make_stacked_graph(
             y_axis_position = -0.1
             y_domain_start = (num_subplots - subplot_num + 1) / num_subplots
             domain = [y_domain_start - subplot_height, y_domain_start]
-            y_axis_units = dtatdata.get_units_from_state(data, plot_y_vars[0])
+            y_axis_units = dtatdata.get_units_from_states(data, plot_y_vars)
 
             if len(plot_y_vars) == 1:
-                y_axis_title = f'{plot_y_vars[0]} ({y_axis_units})' if y_axis_units is not None else f'{plot_y_vars}'
+                y_axis_title = f'{plot_y_vars[0]} ({y_axis_units})' if y_axis_units is not None else f'{plot_y_vars[0]}'
             else:
-                y_axis_title = f'Y axis ({y_axis_units})' if y_axis_units is not None else f'Y axis'
+                y_axis_title = f'{", ".join(plot_y_vars)} ({y_axis_units if len(y_axis_units) == 1 else ", ".join(y_axis_units)})' if y_axis_units is not None else f'{", ".join(plot_y_vars)}'
             y_axis_layout_name = "yaxis{}".format(subplot_num)
             title_color = "#000000"
 
@@ -175,7 +175,7 @@ def make_stacked_graph(
                 if multi_axis:
                     y_axis_position += 0.1
                     title_color = marker_values[y_val]["line"]["color"]
-                    y_axis_title = f"{y_val} ({y_axis_units})"
+                    y_axis_title = f'{y_val} ({y_axis_units})' if y_axis_units is not None else f'{y_val}'
                     y_axis_layout_name = "yaxis{}".format(trace_num)
 
                 graph.update_layout(
@@ -236,12 +236,13 @@ def make_stacked_graph(
                                 col= 1
                             )
                         
+                        # this is where you tinker with the arrow placement settings
                         graph.add_annotation(
-                            x = e[0],
+                            x = e[0], # this one should be left alone; it sets the x value to the time of the event
                             yref = f'y{subplot_num} domain' if subplot_num > 1 else 'y domain',
                             ayref=f'y{subplot_num} domain' if subplot_num > 1 else 'y domain',
-                            y=0,
-                            ay = -0.1,
+                            y=0, # in practical terms, this sets the offset of the arrow point from the Y axis (from 0)
+                            ay = -0.1, # in practical terms, this sets the length of the arrow (I think)
                             text= e[1],
                             hovertext=e[2] if len(e) > 2 else e[1],
                             arrowhead = 1,
@@ -290,7 +291,7 @@ def make_stacked_graph(
             }
         )
 
-        x_unit = dtatdata.get_units_from_state(data, x_var)
+        x_unit = dtatdata.get_unit_from_state(data, x_var)
         graph.update_xaxes(
             title_text=f'{x_var} ({x_unit})' if x_unit is not None else f'{x_var}'
         )
