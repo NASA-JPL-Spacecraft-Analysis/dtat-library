@@ -28,5 +28,5 @@ def get_plotly_marker_values(customize_dict: CustomizedTrace) -> CustomizedMarke
         "line": {
             "width": 0.5 if customize_dict["z_var"] is None else 0,
             "color": palette.get_line_color(customize_dict["color"]),
-        },
+        }
     }

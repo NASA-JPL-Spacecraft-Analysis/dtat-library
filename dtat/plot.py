@@ -22,6 +22,7 @@ from dtat.types import CustomizationOptions
 import warnings
 warnings.filterwarnings('ignore')
 
+
 def make_stacked_graph(
     data: "pd.DataFrame",
     y_vars: Sequence[Sequence[str]],
@@ -39,7 +40,7 @@ def make_stacked_graph(
     figure_height: int = None,
     figure_width: int = None,
     events: dict[tuple] = {},
-    event_line: bool = None
+    event_line: bool = None,
 ):
     '''
     events:
@@ -112,7 +113,7 @@ def make_stacked_graph(
 
         # determine if plot lines should be shown
         line_mode = "lines+markers" if plot_lines else "markers"
-        
+
         data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
         data, z_vals = datacacher.column_values_from_state(data, z_var, elapsed_seconds=True, time="scet") 
         
@@ -197,7 +198,7 @@ def make_stacked_graph(
                         y=data_slice["value"],
                         name=y_val,
                         meta=mouseover_maker.make_meta(z_var, data_slice),
-                        hovertemplate=mouseover_maker.ht_X_Y_Z_names(
+                        hovertemplate=mouseover_maker.ht_X_Y_Z_time_names(
                             xaxis=x_var, yaxis=y_val, zaxis=z_var
                         ),
                         mode=line_mode,
@@ -209,7 +210,7 @@ def make_stacked_graph(
                     col=1,
                 )
                 trace_num += 1
-                
+
                 #EVENT PLOTTING (ARROW)
                 for e in events.get(y_val, []):
 
@@ -247,7 +248,7 @@ def make_stacked_graph(
 
             x_domain_start = max(x_domain_start, y_axis_position)
         
-                      
+
         if multi_axis:
             # adding multiple traces to a subplot resets the axis assignment
             # re-assign y-axes to traces
@@ -279,7 +280,6 @@ def make_stacked_graph(
             {
                 'title': {'text': figure_title},
                 'font_family': 'Arial',
-                'hovermode': 'x unified',
                 'margin': figure_margins
             }
         )
@@ -297,143 +297,135 @@ def make_stacked_graph(
 
 
 
-# """
-# Plotly and other functions for a stacked plot graph
-
-# This version plots a line for each event
-# """
-
-# import logging
-# from collections.abc import Sequence
-# from typing import TYPE_CHECKING, Optional
-
-# import pandas as pd
-# import plotly.graph_objects as go
-# from plotly.subplots import make_subplots
-
-# import appmgr.datacacher as datacacher
-# import appmgr.datachecker as datachecker
-# import appmgr.mouseover_maker as mouseover_maker
-# import charts.commonchartfuncs as common
-# import charts.palette as palette
-# from charts.types import CustomizationOptions
-# from datetime import datetime
-
-
-# def make_stacked_graph(
-#     data: "pd.DataFrame",
-#     y_vars: [str] = [],
-#     x_var: str = "scet",
-#     z_var: Optional[str] = None,
-#     multi_axis: bool = False,
-#     plot_lines: bool = True,
-#     customize_dict: Optional[CustomizationOptions] = None,
-#     unassigned_colors: Optional[list] = None,
-#     background_color: str = palette.DEFAULT_BG_COLOR,
-#     axis_line_color: str = palette.DEFAULT_AXIS_LINE_COLOR,
-#     events = {},
-#     diff: bool = False,
-#     absolute: bool = False,
-#     bar: bool = False,
-#     bar_width: int = 1000
-# ):
-#     """
-#     creates a stacked-plot graph
-#     event:
-#         A dictionary
-#             - key = y_var name
-#             - value = lists of tuples 
-#         example: {"actual": [(5, "event1"), (10, "event3")], "predicted": [(7, "event2")]}
-        
-        
-#     Also creates a diff graph if diff=True. 
-#         - ToDo: (might be weird implementation) If given more than 2 y_vars, then it plots the difference of each of the y_vars with respect
-#           to the first y_var
-#     """
-#     logging.debug("starting to make a new stacked plot graph")
-#     graph = go.Figure()
-#     graph.update_layout(
-#         plot_bgcolor=background_color,
-#         xaxis=dict(
-#             showline=True,
-#             showgrid=True,
-#             gridcolor=axis_line_color,
-#             zerolinecolor=axis_line_color,
-#             linecolor=axis_line_color,
-#             linewidth=2,
-#         ),
-#         yaxis=dict(
-#             showline=True,
-#             showgrid=True,
-#             gridcolor=axis_line_color,
-#             zerolinecolor=axis_line_color,
-#             linecolor=axis_line_color,
-#             linewidth=2,
-#         ),
-#     )
+def make_diff_graph(
+    data: "pd.DataFrame",
+    y1: str,
+    y2: str,
+    y_axis_units: Sequence[str] = [],
+    x_var: str = "scet",
+    figure_title: str = None,
+    customize_dict: Optional[CustomizationOptions] = None,
+    unassigned_colors: Optional[list] = None,
+    background_color: str = '#fcfcfc',
+    axis_line_color: str = '#555555',
+    figure_margins: dict = None,
+    figure_height: int = None,
+    figure_width: int = None,
+    events: dict[tuple] = {},
+    event_line: bool = None,
+    diff: bool = False,
+#    bar: bool = False,
+#    bar_width: int = 1
+):
+    '''
+    events:
+        A dictionary
+            - key = y_var name
+            - value = lists of tuples of (time, name, message)
+        example: {"actual": [(time1, "event1", "message1"), (time2, "event2", "message2")], "predicted": [(time3, "event3", "message3")]}
+    ''' 
+    graph = go.Figure()
+    graph.update_layout(
+        plot_bgcolor=background_color,
+        xaxis=dict(
+            showline=True,
+            showgrid=True,
+            gridcolor=axis_line_color,
+            zerolinecolor=axis_line_color,
+            linecolor=axis_line_color,
+            linewidth=2,
+        ),
+        yaxis=dict(
+            showline=True,
+            showgrid=True,
+            gridcolor=axis_line_color,
+            zerolinecolor=axis_line_color,
+            linecolor=axis_line_color,
+            linewidth=2,
+        ),
+    )
     
-#     visible_traces = []
-#     marker_values = {}
+    visible_traces = []
+    marker_values = {}
 
-#     if len(y_vars) == 0:
-#         raise Exception("need at least one y variable")
-        
 #     if diff == True: #don't need a subplot for one of the y_vars
 #         num_subplots = 1
 #     else:
 #         num_subplots = len(y_vars)
-        
-        
-#     graph = make_subplots(num_subplots, cols=1, shared_xaxes=True, vertical_spacing = 0.2).update_layout(
-#             plot_bgcolor=background_color,
-#             xaxis=dict(
-#                 showline=True,
-#                 showgrid=True,
-#                 gridcolor=axis_line_color,
-#                 zerolinecolor=axis_line_color,
-#                 linecolor=axis_line_color,
-#                 linewidth=2,
-#             ),
-#             yaxis=dict(
-#                 showline=True,
-#                 showgrid=True,
-#                 gridcolor=axis_line_color,
-#                 zerolinecolor=axis_line_color,
-#                 linecolor=axis_line_color,
-#                 linewidth=2,
-#             ),
-#             legend=dict(
-#                 orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
-#             ),
-#             height=max(450, 200 * num_subplots + 2),
-#         )
-    
-#     # determine if plot lines should be shown
-#     line_mode = "lines+markers" if plot_lines else "markers"
-        
+
+    if customize_dict is not None and len(customize_dict) > 0:
+        for t in customize_dict.keys():
+            marker_values[t] = common.get_plotly_marker_values(customize_dict[t])
+
+    if unassigned_colors is None:
+        unassigned_colors = palette.get_default_colors()
+
+    num_subplots = 1
+
+    figure_margins = dict(l=75, b=100, t=50, r=75) if figure_margins is None else figure_margins
+
+    if figure_height is None:
+        figure_height = max(450, 200 * num_subplots + 2)
+
+
+    graph = make_subplots(num_subplots, cols=1, shared_xaxes=True, vertical_spacing = 0.2).update_layout(
+        plot_bgcolor=background_color,
+        xaxis=dict(
+            showline=True,
+            showgrid=True,
+            gridcolor=axis_line_color,
+            zerolinecolor=axis_line_color,
+            linecolor=axis_line_color,
+            linewidth=2,
+        ),
+        yaxis=dict(
+            showline=True,
+            showgrid=True,
+            gridcolor=axis_line_color,
+            zerolinecolor=axis_line_color,
+            linecolor=axis_line_color,
+            linewidth=2,
+        ),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
+        ),
+        height=figure_height
+    )
+
+    # determine if plot lines should be shown
+    line_mode = "lines+markers"
 
 #     #for each of the y variables, it starts adding a new column for that event
 #     for y in y_vars:
 #         data, _ = datacacher.column_values_from_state(data, y, elapsed_seconds=True, time="scet")
 
-#     data, _ = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
-#     data, z_vals = datacacher.column_values_from_state(data, z_var, elapsed_seconds=True, time="scet") 
-
-#     vertical_spacing = 0.2 / num_subplots
-#     subplot_height = (1.0 - vertical_spacing * (num_subplots - 1)) / num_subplots
-
-#     trace_num = 1
-#     x_domain_start = 0
-    
-    
-    
-#     if diff == True and bar == True:
-#         if len(y_vars) != 2:
-#             raise Exception("Need 2 y_vars for difference plotting")
-            
-#         y1 = y_vars[0]
-#         y2 = y_vars[1]
+    data, temp = datacacher.column_values_from_state(data, x_var, elapsed_seconds=True, time="scet")
         
+    vertical_spacing = 0.2 / num_subplots
+    subplot_height = (1.0 - vertical_spacing * (num_subplots - 1)) / num_subplots
+        
+    trace_num = 1
+    x_domain_start = 0
+
+    if diff == True:
+        y1_data_slice = datacacher.get_data_from_state(data, y1)
+        y2_data_slice = datacacher.get_data_from_state(data, y2)
+
+        graph.add_trace(go.Scatter(x = y1_data_slice[x_var], y = y1_data_slice["value"], fill='tozeroy'))
+        graph.add_trace(go.Scatter(x = y2_data_slice[x_var], y = y2_data_slice["value"], fill='tozeroy'))
+
+        graph.update_layout(showlegend=False)
+        graph.update_layout(xaxis_title = x_var, title = f"Difference between {y1} and {y2}")
+
+
+
+# Bar is not currently working as expected, so is commented out.
+# Future developers: there are two parts, one which is older and more broken,
+# and a second which is newer and still broken but at least making graphs.
+# Probably the second portion will be more useful and the first can be left commented.
+#        if bar == True:
+
+# part 1
 #         if plot_lines == True:
 #             graph.add_trace(go.Scatter(x = data[x_var], y = data[y1]))
 #             graph.add_trace(go.Scatter(x = data[x_var], y = data[y2]))
@@ -452,205 +444,172 @@ def make_stacked_graph(
         
 #         myDataNew["time"] = myDataNew.index
 #         average_time = myDataNew[["diff", "time"]].diff(1)["time"].mean()
+# part 2
+#            average_time = y1_data_slice[x_var].max() - y1_data_slice[x_var].min()
+#            if datachecker.is_time_type(x_var):
+#                average_time = average_time.total_seconds()
 
-#         graph.add_traces(go.Bar(x=myDataNew.index, y = myDataNew["diff"], width=average_time.seconds*bar_width,
-#                                 marker_color= myDataNew['color'], 
-#                                 marker_line_color=myDataNew['color'],
-#                                 opacity=0.6
-#                                 ))
-#         graph.update_layout(showlegend=False)
-#         graph.update_layout(xaxis_title = x_var, title = f"Difference between {y1} and {y2}")
+#            interpolated = datacacher.column_values_from_state(data, y2, x_var)[0]
+#            diff_slice = interpolated['value'] - interpolated[y2]
 
-#         return graph
+#            #diff_slice = y1_data_slice["value"] - y2_data_slice["value"]
+#            print (diff_slice)
 
-    
-#     if diff == True:
-#         if len(y_vars) != 2:
-#             raise Exception("Need 2 y_vars for difference plotting")
+#            print (average_time)
+
+#            graph.add_traces(go.Bar(x=y1_data_slice[x_var], y = diff_slice, 
+#                                width=average_time*bar_width,
+#                                marker_color= '#007700', 
+#                                #marker_line_color=myDataNew['color'],
+#                                opacity=0.9
+#                                ))
             
-#         #helper function for difference coloring
-#         def fillcol(label, higher_color, lower_color):
-#             if label >= 1:
-#                 return higher_color
-#             else:
-#                 return lower_color
+
+
+    else:
+            for subplot_num, plot_y_vars in enumerate(y_vars, start=1):
+
+                # setting to -.06 so it will be incremented to zero
+                y_axis_position = -0.1
+                y_domain_start = (num_subplots - subplot_num + 1) / num_subplots
+                domain = [y_domain_start - subplot_height, y_domain_start]
+
+                if len(plot_y_vars) == 1:
+                    y_axis_title = plot_y_vars[0]
+                else:
+                    y_axis_title = f'Y axis ({y_axis_units[subplot_num-1]})' if len(y_axis_units) > 0 else 'Y axis'
+                y_axis_layout_name = "yaxis{}".format(subplot_num)
+                title_color = "#000000"
+
+                for y_val in plot_y_vars:
             
-#         y1 = y_vars[0]
-#         y2 = y_vars[1]
-#         graph.add_trace(go.Scatter(x = data[x_var], y = data[y1]))
-#         graph.add_trace(go.Scatter(x = data[x_var], y = data[y2]))
+                    if y_val not in visible_traces:
+                        visible_traces.append(y_val)
+                    data_slice = datacacher.get_data_from_state(data, y_val)
+                    data_slice["value"] = pd.to_numeric(
+                        data_slice["value"], errors='ignore'
+                    )
+                    if y_val not in marker_values.keys():
+                        color, unassigned_colors = palette.pop_next_color(
+                            unassigned_colors
+                        )
+                        if color in palette.default_colors.keys():
+                            line_color = palette.default_colors[color]["line_color"]
+                        else:
+                            line_color = "#000000"
+                        marker_values[y_val] = {
+                            "size": 5,
+                            "symbol": "circle",
+                            "color": color,
+                            "colorscale": palette.make_discrete_colorscale([], []),
+                            "showscale": False,
+                            "line": {
+                                "width": 0.5,
+                                "color": line_color,
+                            },
+                        }
 
+                    graph.update_layout(
+                        {
+                            y_axis_layout_name: {
+                                "title": {
+                                    "text": y_axis_title,
+                                    "font": {"color": title_color},
+                                },
+                                "position": max(y_axis_position, 0),
+                                "anchor": "free",
+                                "tickfont": {"color": title_color},
+                                "domain": domain,
+                                "overlaying": "y{}".format(subplot_num),
+                            }
+                        }
+                    )
+                    graph.add_trace(
+                        go.Scattergl(
+                            x=data_slice[x_var],
+                            y=data_slice["value"],
+                            name=y_val,
+                            meta=mouseover_maker.make_meta(None, data_slice),
+                            hovertemplate=mouseover_maker.ht_X_Y_Z_time_names(
+                                xaxis=x_var, yaxis=y_val, zaxis=None
+                            ),
+                            mode=line_mode,
+                            showlegend=True,
+                            opacity=0.7,
+                            marker=marker_values[y_val],
+                        ),
+                        row=subplot_num,
+                        col=1,
+                    )
+                    trace_num += 1
 
-#         myData = data.copy()
-#         myData = myData[[y1,y2,x_var]]
+                    #EVENT PLOTTING (ARROW)
+                    for e in events.get(y_val, []):
 
-#         myData['label'] = np.where(myData[y1] > myData[y2], 1, 0)
-#         myData['group'] = myData['label'].ne(myData['label'].shift()).cumsum()
-#         myData = myData.groupby('group')
+                        #for each of the y variables, it starts adding a new column for that event
+                        if y_val not in data_slice.columns:
+                            data, temp = datacacher.column_values_from_state(data, y_val, elapsed_seconds=True, time="scet")
+                        
+                        #if the x variable is time (otherwise don't bother trying to plot non-time events)
+                        if datachecker.is_time_type(x_var):
+                            if len(e) == 2:
+                                e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1])
+                            else:
+                                e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1], e[2])
+                                                
+                            if event_line:
+                                graph.add_vline(
+                                    x=e[0],
+                                    line_width=3, 
+                                    line_color="black", 
+                                    row = subplot_num-1, 
+                                    col= 1
+                                )
+                        
+                            graph.add_annotation(
+                                x = e[0],
+                                yref = f'y{subplot_num} domain' if subplot_num > 1 else 'y domain',
+                                ayref=f'y{subplot_num} domain' if subplot_num > 1 else 'y domain',
+                                y=0,
+                                ay = -0.1,
+                                text= e[1],
+                                hovertext=e[2] if len(e) > 2 else e[1],
+                                arrowhead = 1,
+                                showarrow = True
+                            )
 
-#         dfs = []
-#         for name, data in myData:
-#             dfs.append(data)
+                x_domain_start = max(x_domain_start, y_axis_position)
+
+    graph.update_xaxes(
+            showline=True,
+            showgrid=True,
+            gridcolor=axis_line_color,
+            zerolinecolor=axis_line_color,
+            linecolor=axis_line_color,
+            linewidth=2,
+        )
+    graph.update_yaxes(
+            showline=True,
+            showgrid=True,
+            gridcolor=axis_line_color,
+            zerolinecolor=axis_line_color,
+            linecolor=axis_line_color,
+            linewidth=2,
+        )
+
+    graph.update_layout(
+            {
+                'title': {'text': figure_title},
+                'font_family': 'Arial',
+                'margin': figure_margins
+            }
+        )
+
+    graph.update_xaxes(
+            title_text=x_var
+        )
+
+    if figure_width is not None:
+            graph.update_layout({'width': figure_width})
         
-#         #color for when y1 > y2
-#         higher_color, unassigned_colors = palette.pop_next_color(unassigned_colors)
-#         higher_color = higher_color.lstrip("#")
-#         higher_color = 'rgba'+ str(tuple([int(higher_color[i:i+2], 16) for i in (0,2,4)] + [0.4]))
-#         higher_color = 'rgba(0,255,0,0.4)'  # remove this line if you want color to come from pallete instead
-    
-        
-#         #color for when y2 <= y1
-#         lower_color, unassigned_colors = palette.pop_next_color(unassigned_colors)
-#         lower_color = lower_color.lstrip("#")
-#         lower_color = 'rgba'+ str(tuple([int(lower_color[i:i+2], 16) for i in (0,2,4)] + [0.4]))
-#         lower_color = 'rgba(255,0,0,0.4)' # remove this line if you want color to come from pallete instead
-
-#         for df in dfs:
-#             graph.add_traces(go.Scatter(x= df[x_var], y = df[y1],
-#                               line = dict(color='rgba(0,0,0,0)')))
-
-#             graph.add_traces(go.Scatter(x=df[x_var], y = df[y2],
-#                               line = dict(color='rgba(0,0,0,0)'),
-#                               fill='tonexty', 
-#                               fillcolor = fillcol(df['label'].iloc[0], higher_color, lower_color)))
-
-#         graph.update_layout(showlegend=False)
-#         graph.update_layout(xaxis_title = x_var, title = f"Difference between {y1} and {y2}")
-
-#         return graph
-
-
-#     for subplot_num, y_val in enumerate(y_vars, start=1):
-#         print(y_val)
-
-#         # setting to -.06 so it will be incremented to zero
-#         y_axis_position = -0.06
-#         y_domain_start = (num_subplots - subplot_num + 1) / num_subplots
-#         domain = [y_domain_start - subplot_height, y_domain_start]
-
-#         y_axis_layout_name = "yaxis{}".format(subplot_num)
-#         title_color = "#000000"
-
-#         if y_val not in visible_traces:
-#             visible_traces.append(y_val)
-#         data_slice = datacacher.get_data_from_state(data, y_val)
-#         #print(data_slice)
-#         data_slice["value"] = pd.to_numeric(
-#             data_slice["value"], errors="ignore"
-#         )
-        
-#         if y_val not in marker_values.keys():
-#             if z_var is not None and z_var in data.columns:
-#                 color = data_slice[z_vals]
-#                 line_color = "#000000"
-#             else:
-#                 color, unassigned_colors = palette.pop_next_color(
-#                     unassigned_colors
-#                 )
-#                 if color in palette.default_colors.keys():
-#                     line_color = palette.default_colors[color]["line_color"]
-#                 else:
-#                     line_color = "#000000"
-#             marker_values[y_val] = {
-#                 "size": 5,
-#                 "symbol": "circle",
-#                 "color": color,
-#                 "colorscale": palette.make_discrete_colorscale([], []),
-#                 "showscale": (z_var is not None),
-#                 "line": {
-#                     "width": 0.5 if z_var is None else 0,
-#                     "color": line_color,
-#                 },
-#             }
-#         if multi_axis:
-#             y_axis_position += 0.06
-#             title_color = marker_values[y_val]["line"]["color"]
-#             y_axis_title = "{} ({})".format(y_val, "Unit")
-#             y_axis_layout_name = "yaxis{}".format(trace_num)
-
-#         graph.update_layout(
-#             {
-#                 y_axis_layout_name: {
-#                     "position": max(y_axis_position, 0),
-#                     "anchor": "free",
-#                     "tickfont": {"color": title_color},
-#                     "domain": domain,
-#                     "overlaying": "y{}".format(subplot_num),
-#                 }
-#             }
-#         )
-#         graph.add_trace(
-#             go.Scattergl(
-#                 x=data_slice[x_var],
-#                 y=data_slice["value"],
-#                 name=y_val,
-#                 meta=mouseover_maker.make_meta(z_var, data_slice),
-#                 hovertemplate=mouseover_maker.ht_X_Y_Z_names(
-#                     xaxis=x_var, yaxis=y_val, zaxis=z_var
-#                 ),
-#                 mode=line_mode,
-#                 showlegend=True,
-#                 opacity=0.7,
-#                 marker=marker_values[y_val],
-#             ),
-#             row=subplot_num,
-#             col=1,
-#         )
-
-#         trace_num += 1
-
-#         for e in events.get(y_val, []):
-
-#             graph.add_vline(
-#                 x= e[0].timestamp()*1000, 
-#                 line_width=3, 
-#                 line_color="black", 
-#                 row = trace_num-1, 
-#                 col= 1)
-
-#             ## this way is most likely more reliable but has the annotation at the bottom
-#             graph.add_annotation(
-#                     xref='x',
-#                     yref='paper',
-#                     x= e[0].timestamp()*1000,
-#                     #y= 1/(trace_num-1),
-#                     y = 1,
-#                     text= e[1],
-#                     hovertext=e[2],
-#                     showarrow = False,
-#                     xanchor = "right",
-#                     yanchor = "top",
-#                     row = trace_num - 1,
-#                     col = 1
-#                 )
-
-#         x_domain_start = max(x_domain_start, y_axis_position)
-
-#     if multi_axis:
-#         # adding multiple traces to a subplot resets the axis assignment
-#         # re-assign y-axes to traces
-#         for trace_num, trace in enumerate(graph.data, start=1):
-#             trace.yaxis = "y{}".format(trace_num)
-#         # set shared x-axis domain based on positions of y-axes
-#         graph.update_xaxes(
-#             domain=[x_domain_start, 1], anchor="y{}".format(trace_num)
-#         )
-
-#     graph.update_xaxes(
-#         showline=True,
-#         showgrid=True,
-#         gridcolor=axis_line_color,
-#         zerolinecolor=axis_line_color,
-#         linecolor=axis_line_color,
-#         linewidth=2,
-#     )
-#     graph.update_yaxes(
-#         showline=True,
-#         showgrid=True,
-#         gridcolor=axis_line_color,
-#         zerolinecolor=axis_line_color,
-#         linecolor=axis_line_color,
-#         linewidth=2,
-#     )
-
-#     return graph, unassigned_colors, marker_values, visible_traces
+    return graph, unassigned_colors, marker_values, visible_traces

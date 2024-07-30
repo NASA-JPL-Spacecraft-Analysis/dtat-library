@@ -181,15 +181,21 @@ def make_discrete_colorscale(
     num_colors = len(color_set)
     if num_colors == 0:
         return "jet"  # default rainbow colorscale
-    divisions = 1.0 / num_colors
-    c_index = 0.0
     for color in color_set:  # Loop over the color sets
-        if custom_divisions is not None:
-            colorscale.append((custom_divisions.pop(0), color))  # start color block
-            colorscale.append((custom_divisions[0] - 0.001, color))  # end color block
-        else:
-            colorscale.append((c_index, color))  # start color block
-            colorscale.append((c_index + divisions - 0.001, color))  # end color block
-            c_index = c_index + divisions
+        colorscale.append((custom_divisions.pop(0), color))  # start color block
+        colorscale.append((custom_divisions[0] - 0.001, color))  # end color block
     colorscale[-1] = (1, colorscale[-1][1])
+    colorscale.insert(0, (0, colorscale[0][1]))
     return colorscale
+
+def make_discrete_colorscale_from_data(
+        color_set: list, bin_lower_bounds: list, color_data
+):
+    datamin = color_data.min()['value']
+    datamax = color_data.max()['value']
+    return make_discrete_colorscale(
+        color_set=color_set,
+        custom_divisions=bin_lower_bounds,
+        data_min=datamin,
+        data_max=datamax,
+        )
