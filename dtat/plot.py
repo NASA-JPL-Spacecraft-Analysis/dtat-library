@@ -132,7 +132,7 @@ def make_stacked_graph(
             y_axis_units = dtatdata.get_units_from_states(data, plot_y_vars)
 
             if len(plot_y_vars) == 1:
-                y_axis_title = f'{plot_y_vars[0]} ({y_axis_units})' if y_axis_units is not None else f'{plot_y_vars[0]}'
+                y_axis_title = f'{plot_y_vars[0]} ({y_axis_units[0]})' if y_axis_units is not None else f'{plot_y_vars[0]}'
             else:
                 y_axis_title = f'{", ".join(plot_y_vars)} ({y_axis_units if len(y_axis_units) == 1 else ", ".join(y_axis_units)})' if y_axis_units is not None else f'{", ".join(plot_y_vars)}'
             y_axis_layout_name = "yaxis{}".format(subplot_num)
@@ -147,6 +147,7 @@ def make_stacked_graph(
                     data_slice["value"], errors='ignore'
                 )
                 if y_val not in marker_values.keys():
+                    colorbar = common.make_colorbar_dict(data, z_var)
                     if z_var is not None and z_var in data.columns:
                         color = data_slice[z_vals]
                         line_color = "#000000"
@@ -157,7 +158,7 @@ def make_stacked_graph(
                         if color in palette.default_colors.keys():
                             line_color = palette.default_colors[color]["line_color"]
                         else:
-                            line_color = "#000000"
+                            line_color = color
                     marker_values[y_val] = {
                         "size": 5,
                         "symbol": "circle",
@@ -168,13 +169,16 @@ def make_stacked_graph(
                             "width": 0.5 if z_var is None else 0,
                             "color": line_color,
                         },
+                        "colorbar": colorbar
                     }
                 else:
                     if z_var is not None and z_var in data.columns:
                         marker_values[y_val]["color"] = data_slice[z_vals]
+                        marker_values[y_val]["colorbar"] = common.make_colorbar_dict(data, z_var)
                 if multi_axis:
                     y_axis_position += 0.1
                     title_color = marker_values[y_val]["line"]["color"]
+                    y_axis_units = dtatdata.get_unit_from_state(data, y_val)
                     y_axis_title = f'{y_val} ({y_axis_units})' if y_axis_units is not None else f'{y_val}'
                     y_axis_layout_name = "yaxis{}".format(trace_num)
 
@@ -189,7 +193,7 @@ def make_stacked_graph(
                             "anchor": "free",
                             "tickfont": {"color": title_color},
                             "domain": domain,
-                            "overlaying": "y{}".format(subplot_num)
+                            "overlaying": "y{}".format(subplot_num),
                         }
                     }
                 )
@@ -223,9 +227,9 @@ def make_stacked_graph(
                     #if the x variable is time (otherwise don't bother trying to plot non-time events)
                     if datachecker.is_time_type(x_var):
                         if len(e) == 2:
-                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1])
+                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S"), e[1])
                         else:
-                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1], e[2])
+                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S"), e[1], e[2])
                                                 
                         if event_line:
                             graph.add_vline(
@@ -272,15 +276,15 @@ def make_stacked_graph(
         )
         if doy:
             graph.update_xaxes(
-                tickformat='%Y/%jT%H:%M:%S.%L'
+                tickformat='%Y/%jT%H:%M:%S'
             )
+
         graph.update_yaxes(
             showline=True,
             showgrid=True,
             gridcolor=axis_line_color,
             zerolinecolor=axis_line_color,
-            linecolor=axis_line_color,
-            linewidth=2,
+            linewidth=2
         )
 
         graph.update_layout(

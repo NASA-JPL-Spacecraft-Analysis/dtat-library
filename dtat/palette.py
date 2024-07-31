@@ -105,13 +105,13 @@ def get_default_shape_options():
 
 def get_line_color(color):
     """Tries to return a related line color.
-    If not found, returns pure black."""
+    If not found, returns the color again."""
     if (
         color is None
         or not isinstance(color, str)
         or color not in default_colors.keys()
     ):
-        return "#000000"
+        return color
     return default_colors[color]["line_color"]
 
 
