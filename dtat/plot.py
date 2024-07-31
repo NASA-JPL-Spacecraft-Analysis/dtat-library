@@ -147,7 +147,6 @@ def make_stacked_graph(
                     data_slice["value"], errors='ignore'
                 )
                 if y_val not in marker_values.keys():
-                    colorbar = common.make_colorbar_dict(data, z_var)
                     if z_var is not None and z_var in data.columns:
                         color = data_slice[z_vals]
                         line_color = "#000000"
@@ -159,6 +158,7 @@ def make_stacked_graph(
                             line_color = palette.default_colors[color]["line_color"]
                         else:
                             line_color = color
+                    colorbar = common.make_colorbar_dict(data, z_var, z_vals, color)
                     marker_values[y_val] = {
                         "size": 5,
                         "symbol": "circle",
@@ -174,7 +174,7 @@ def make_stacked_graph(
                 else:
                     if z_var is not None and z_var in data.columns:
                         marker_values[y_val]["color"] = data_slice[z_vals]
-                        marker_values[y_val]["colorbar"] = common.make_colorbar_dict(data, z_var)
+                        marker_values[y_val]["colorbar"] = common.make_colorbar_dict(data, z_var, z_vals, marker_values[y_val]["colorscale"])
                 if multi_axis:
                     y_axis_position += 0.1
                     title_color = marker_values[y_val]["line"]["color"]
@@ -227,9 +227,9 @@ def make_stacked_graph(
                     #if the x variable is time (otherwise don't bother trying to plot non-time events)
                     if datachecker.is_time_type(x_var):
                         if len(e) == 2:
-                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S"), e[1])
+                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1])
                         else:
-                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S"), e[1], e[2])
+                            e = (datetime.strptime(e[0], "%Y-%jT%H:%M:%S.%f"), e[1], e[2])
                                                 
                         if event_line:
                             graph.add_vline(

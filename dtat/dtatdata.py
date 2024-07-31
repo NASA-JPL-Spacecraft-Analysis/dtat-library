@@ -82,10 +82,11 @@ def column_values_from_state(data, state, time, elapsed_seconds=False):
     data = sort_by(data, time)
     interpolator = interpolate.DefaultInterpolator(data)
     data = interpolator.make_column_values(state, elapsed_seconds)
-    state = "z_numeric"
     log_data(data)
     if datachecker.is_time_type(state) and elapsed_seconds:
         state = "elapsed_seconds"
+    else:
+        state = "z_numeric"
     return data, state
 
 
