@@ -35,20 +35,20 @@ def ht_X_Y_Z_names(xaxis="X", yaxis="Y", zaxis="Z"):
     should be set to the output of make_meta() for
     this hovertemplate to work properly."""
     if checker.is_time_type(xaxis):
-        x = "%{x|%Y-%jT%H:%M:%S.%L}"
+        x = "X: %{x|%Y-%jT%H:%M:%S.%L}"
     else:
-        x = "%{x}"
+        x = "X: %{x}"
     if checker.is_time_type(yaxis):
-        y = "%{y|%Y-%jT%H:%M:%S.%L}"
+        y = "Y: %{y|%Y-%jT%H:%M:%S.%L}"
     else:
-        y = "%{y}"
+        y = "Y: %{y}"
     if checker.is_time_type(zaxis):
-        z = "%{meta[0]|%Y-%jT%H:%M:%S.%L}"
+        z = "Z: %{meta[0]|%Y-%jT%H:%M:%S.%L}"
     else:
-        z = "%{meta[0]}"
-    template = xaxis + ": " + x + "<br>" + yaxis + ": " + y
+        z = "Z: %{meta[0]}"
+    template = "X: " + xaxis + ": " + x + "<br>" + "Y: " + yaxis + ": " + y
     if zaxis is not None:
-        template = template + "<br>" + zaxis + ": " + z
+        template = template + "<br>" + "Z: " + zaxis + ": " + z
     template = template + "<extra></extra>"  # removes the trace tag
     return template
 
@@ -71,9 +71,9 @@ def ht_X_Y_Z_time_names(xaxis="X", yaxis="Y", zaxis="Z"):
     else:
         z = "%{meta[0]}"
     time = "%{meta[1]|%Y-%jT%H:%M:%S.%L}"
-    template = xaxis + ": " + x + "<br>" + yaxis + ": " + y
+    template = "X: " + xaxis + ": " + x + "<br>" + "Y: " + yaxis + ": " + y
     if zaxis is not None:
-        template = template + "<br>" + zaxis + ": " + z
-    template += "<br>scet: " + time
+        template = template + "<br>" + "Z: " + zaxis + ": " + z
+    template += "<br>Time: scet: " + time
     template = template + "<extra></extra>"  # removes the trace tag
     return template

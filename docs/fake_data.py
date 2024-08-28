@@ -19,7 +19,8 @@ def instrument_turn_on():
 	return pd.DataFrame({
 		"scet": make_time_col(length=1000) + make_time_col(length=1000) + make_time_col(length=1000),
 		"name": ["Voltage"]*1000 + ["Current"]*1000 + ["Mode"]*1000,
-		"value": list(voltage) + list(current) + ['TEST']*300 + ['INIT']*150 + ['OPERATIONAL']*550
+		"value": list(voltage) + list(current) + ['TEST']*300 + ['INIT']*150 + ['OPERATIONAL']*550,
+		"unit": ["volts"]*1000 + ["amps"]*1000 + ["mode"]*1000,
 		})
 
 def drifting_off_nominal():

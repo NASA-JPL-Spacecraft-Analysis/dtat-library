@@ -1,6 +1,8 @@
 """Datacache object functions for a cache for data from one or more sources"""
 
 import logging
+import datetime
+import warnings
 
 import pandas as pd
 
@@ -83,6 +85,8 @@ def column_values_from_state(data, state, time, elapsed_seconds=False):
     log_data(data)
     if datachecker.is_time_type(state) and elapsed_seconds:
         state = "elapsed_seconds"
+    else:
+        state = "z_numeric"
     return data, state
 
 
@@ -96,3 +100,37 @@ def print_data(data):
     """Print the current data to console"""
     with pd.option_context("display.max_rows", None, "display.max_columns", None):
         print("\n %s", data)
+
+
+def get_units_from_states(data, states):
+    if isinstance(states, list):
+        units = []
+        for state in states:
+            r = get_unit_from_state(data, state)
+            units.append(r)
+        return units
+    else: 
+        return get_unit_from_state(data, states)
+
+def get_unit_from_state(data, state):
+    if datachecker.is_time_type(state):
+        return 'Time'
+    if 'unit' in data.columns:
+        state_data = get_data_from_state(data, state)
+        if len(state_data) > 0:
+            unit = state_data['unit'].unique()
+            if len(unit) == 1:
+                return unit[0]
+            warnings.warn(f'DTAT has detected multiple units for a single state. {state} has units {unit}.')
+            return unit
+    return 'Unknown'
+
+
+def make_doy_from_state(data, state):
+    print (data.columns)
+    if datachecker.is_time_type(state) and 'doy' not in data.columns:
+        data['doy'] = data.apply(
+            lambda row: datetime.datetime.strftime(row[state], '%Y/%jT%H:%M:%S.%f'), 
+            axis=1)
+        #print (data['doy'])
+    return data
