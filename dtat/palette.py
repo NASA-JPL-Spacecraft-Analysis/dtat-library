@@ -14,19 +14,19 @@ default_colors = {
     "#717171": {"line_color": "#FFE100", "name": "Dark-Grey"},
     "#459D4C": {"line_color": "#459D4C", "name": "Dark-Green"},
 
-    "#3498DB": {"line_color": "#", "name": "Med-Blue"},
-    "#E26352": {"line_color": "#", "name": "Med-Red"},
-    "#E3B740": {"line_color": "#", "name": "Med-Yellow"},
-    "#A55A10": {"line_color": "#", "name": "Med-Purple"},
-    "#8B8B8B": {"line_color": "#", "name": "Med-Grey"},
-    "#4CBB51": {"line_color": "#", "name": "Med-Green"},
+    "#3498DB": {"line_color": "#3498DB", "name": "Med-Blue"},
+    "#E26352": {"line_color": "#E26352", "name": "Med-Red"},
+    "#E3B740": {"line_color": "#E3B740", "name": "Med-Yellow"},
+    "#A55A10": {"line_color": "#A55A10", "name": "Med-Purple"},
+    "#8B8B8B": {"line_color": "#8B8B8B", "name": "Med-Grey"},
+    "#4CBB51": {"line_color": "#4CBB51", "name": "Med-Green"},
 
-    "#51B0DA": {"line_color": "#", "name": "Light-Blue"},
-    "#E26352": {"line_color": "#", "name": "Light-Red"},
-    "#FFCE59": {"line_color": "#", "name": "Light-Yellow"},
-    "#B072B7": {"line_color": "#", "name": "Light-Purple"},
-    "#A5A5A5": {"line_color": "#", "name": "Light-Grey"},
-    "#66D46E": {"line_color": "#", "name": "Light-Green"},
+    "#51B0DA": {"line_color": "#51B0DA", "name": "Light-Blue"},
+    "#E26352": {"line_color": "#E26352", "name": "Light-Red"},
+    "#FFCE59": {"line_color": "#FFCE59", "name": "Light-Yellow"},
+    "#B072B7": {"line_color": "#B072B7", "name": "Light-Purple"},
+    "#A5A5A5": {"line_color": "#A5A5A5", "name": "Light-Grey"},
+    "#66D46E": {"line_color": "#66D46E", "name": "Light-Green"},
 
 
 
