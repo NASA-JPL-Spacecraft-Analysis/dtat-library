@@ -1,5 +1,5 @@
 [project]
-name = "eurc-fspa-dtat"
+name = "tts-dtat"
 description = "Data Trending and Analysis Tool Library"
 readme = "README.md"
 requires-python = ">=3.6"
