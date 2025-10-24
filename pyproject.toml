@@ -1,5 +1,5 @@
 [project]
-name = "tts-dtat"
+name = "dtat"
 description = "Data Trending and Analysis Tool Library"
 readme = "README.md"
 requires-python = ">=3.6"
@@ -32,6 +32,6 @@ version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
 
 [build-system]
-requires = ["setuptools", "wheel", "toml", "tts-deployments", "setuptools_scm"]
+requires = ["setuptools", "wheel", "toml", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
